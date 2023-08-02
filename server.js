@@ -1,11 +1,11 @@
 const express = require('express');
-const path = require("path");
-const fs = require("fs");
-const inquirer = require("inquirer");
-const {prompt} = require("helpers");
+const { prompts } = require("./helpers/helpers");
 
 const PORT = process.env.port || 3001;
 const app = express();
+
+const path = require("path");
+const fs = require("fs");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -14,7 +14,7 @@ app.use(express.static("public"));
 
 // create a route to handle home page
 app.get("/", (req, res) => {
-   prompt()
+   prompts()
 })
 
 // after homepage must display 5 options: 
