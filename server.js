@@ -95,13 +95,6 @@ const updateEmployee = () => {
   });
 }
 
-
-
-
-
-
-
-
 inquirer.prompt(questions)
   .then((answers) => {
     switch (answers.options) {
@@ -128,13 +121,12 @@ inquirer.prompt(questions)
         break;
       case "Nevermind I'm done":
         console.log("Goodbye!");
-  }
+    }
 });
 // after homepage must display 5 options: 
 // add department - prompt appears, asks for name of the department, then adds department
         // probably needs inquirer and fs.read / writefile
 // add role - prompt for name, salary and department
-        // inquirer and fs read/write file
 // add employee - prompt for first name, last name, role and manager, add to db
 // update employee role - prompt update new role and add to database
         // will need seperate dbs for each function
