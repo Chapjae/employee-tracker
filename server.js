@@ -30,7 +30,9 @@ const questions = [
         choices : ["View All Departments", "View All Roles", "View All Employees", "Add a Department", 
                    "Add a Role", "Add an Employee", "Update an Employee", "Nevermind I'm done"]
     },
-] 
+  ]
+  
+const departmentsArr = ['Sales','Marketing','Finance','Human Resources','Operations'];  
 
 const viewAllDepartments = () => {
     db.query("SELECT * FROM departments", (err, res) => {
@@ -69,11 +71,30 @@ const addDepartment = () => {
 }
 
 const addRole = () => {
-  db.query("INSERT INTO roles SET ?", (err, res) => {
-    if(err) {
-      console.log(err);
-    }
-    console.log(res);
+  inquirer.prompt([{name: "title", message: "What is this role called?"},
+                   {name: "salary", message: "How much does this role get paid?"},
+                   {type: "list", name: "department", message: "What department does this role belong to?",
+                    choices: departmentsArr
+                  }])
+    .then((answers) => {
+      const role = answers.title;
+      const salary = answers.salary;
+      const department = answers.department;
+      let departmentIdx;
+      
+      for (let i = 0; i < departmentsArr.length; i++) {  
+          if (department === departmentsArr[i]) {
+            departmentIdx = departmentsArr[i].indexOf();
+          } 
+          return departmentIdx;
+      }
+      console.log(departmentIdx);
+    db.promise().query("INSERT INTO roles (job_title, salaries, department_id) VALUES ( ?, ?, ?)").then( ([role, salary, departmentIdx]), (err, res) => {
+      if(err) {
+        console.log(err);
+      }
+      console.log("Role added!");
+    });
   });
 }
 

@@ -4,15 +4,16 @@ CREATE DATABASE departments_db;
 USE departments_db;
 
 CREATE TABLE departments (
-    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(30) NOT NULL
 );
 
 CREATE TABLE roles (
-    id INT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY ,
     job_title VARCHAR(30) NOT NULL,
     salaries DECIMAL,
-    department_id INT
+    department_id INT,
+    FOREIGN KEY (department_id) REFERENCES departments(id)
 ); 
 
 CREATE TABLE employees (
