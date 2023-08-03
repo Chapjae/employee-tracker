@@ -27,8 +27,8 @@ const questions = [
         type : "list",
         name : "options",
         message : "What would you like to do today?",
-        choices : ["View All Departments", "View All Roles", "View All Employees", 
-                   "Add a Department", "Add a Role", "Add an Employee", "Update an Employee"]
+        choices : ["View All Departments", "View All Roles", "View All Employees", "Add a Department", 
+                   "Add a Role", "Add an Employee", "Update an Employee", "Nevermind I'm done"]
     },
 ] 
 
@@ -59,6 +59,41 @@ const viewAllEmployees = () => {
   });
 }  
 
+const addDepartment = () => {
+  db.query("INSERT INTO departments SET ?", (err, res) => {
+    if(err) {
+      console.log(err);
+    }
+    console.log(res);
+  });
+}
+
+const addRole = () => {
+  db.query("INSERT INTO roles SET ?", (err, res) => {
+    if(err) {
+      console.log(err);
+    }
+    console.log(res);
+  });
+}
+
+const addEmployee = () => {
+  db.query("INSERT INTO employees SET ?", (err, res) => {
+    if(err) {
+      console.log(err);
+    }
+    console.log(res);
+  });
+}
+
+const updateEmployee = () => {
+  db.query("UPDATE employees SET ?", (err, res) => {
+    if(err) {
+      console.log(err);
+    }
+    console.log(res);
+  });
+}
 
 
 
@@ -76,6 +111,23 @@ inquirer.prompt(questions)
       case "View All Roles":
         viewAllRoles();
         break;
+      case "View All Employees":
+        viewAllEmployees();
+        break;
+      case "Add a Department":
+        addDepartment();
+        break;
+      case "Add a Role":
+        addRole();
+        break;
+      case "Add an Employee":
+        addEmployee();
+        break;
+      case "Update an Employee":
+        updateEmployee();
+        break;
+      case "Nevermind I'm done":
+        console.log("Goodbye!");
   }
 });
 // after homepage must display 5 options: 
