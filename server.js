@@ -1,7 +1,6 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
 const fs = require("fs");
-const { printTable } = require('console-table-printer');
 
 const PORT = process.env.PORT || 3000;
 
@@ -68,8 +67,6 @@ const db = mysql.createConnection(
   console.log("connected"),
   navMenu()
 );
-
-
 
 const viewAllDepartments = () => {
     db.query("SELECT * FROM departments", (err, res) => {
