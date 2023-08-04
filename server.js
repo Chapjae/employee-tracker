@@ -1,13 +1,10 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
 const fs = require("fs");
+const { printTable } = require('console-table-printer');
+
 const PORT = process.env.PORT || 3000;
 
-const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.use(express.static("public"));
 const questions = [
     {
         type : "list",
@@ -71,7 +68,7 @@ const viewAllDepartments = () => {
       if (err) {
         console.log(err);
       }
-      console.table(res);
+      printTable(res);
       navMenu();
   });
 }
@@ -81,7 +78,7 @@ const viewAllRoles = () => {
     if (err) {
       console.log(err);
     }
-    console.table(res);
+    printTable(res);
     navMenu();
   });
 }  
@@ -91,24 +88,20 @@ const viewAllEmployees = () => {
     if(err) {
       console.log(err);
     }
-    console.table(res);
+    printTable(res);
     navMenu();
   });
 }  
 
 const addDepartment = () => {
-  inquirer.prompt(departmentQuestions)
+  inquirer.prompt(departmentQuestion)
   .then(answers => {
-   db.query("INSERT INTO departments (name) values (?)", (err, res) => {
-    newdepartment, function(err, res) {
-
-    } 
-  
-    
-    if(err) {
-      console.log(err);
-    }
-    console.log(res);
+   db.query("INSERT INTO departments (name) SET ?", answers.name, (err, res) => {
+      if(err) {
+        console.log(err);
+      }
+      console.table(res);
+    });
   });
 }
 
