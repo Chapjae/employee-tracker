@@ -17,7 +17,14 @@ const questions = [
 
 const departmentQuestion = [{name: "name", message: "What is the name of the department you would like to add?"}];  
 
-const departmentsArr = ['Sales','Marketing','Finance','Human Resources','Operations'];  
+const departmentsArr = [{value:1, name:'Sales'},{value:2, name:'Marketing'},{value: 3, name:'Finance'},{value: 3, name:'Human Resources'},{value:4, name:'Operations'}];  
+
+const employeeQuestion = [
+                          {name: "first_name", message: "What is the employee's first name?"},
+                          {name: "last_name", message: "What is the employee's last name?"},
+                          {name: "role", message: "What is the employee's role?"},
+                          {name: "manager", message: "Who is the employee's manager?"}
+                         ]
 
 const navMenu = () => {
   inquirer.prompt(questions)
@@ -45,8 +52,9 @@ const navMenu = () => {
           updateEmployee();
           break;
         case "Nevermind I'm done":
-          console.log("Goodbye!");
+          process.exit(0);
     } 
+    navMenu();
   });
 };
 
@@ -95,12 +103,13 @@ const viewAllEmployees = () => {
 
 const addDepartment = () => {
   inquirer.prompt(departmentQuestion)
-  .then(answers => {
-   db.query("INSERT INTO departments (name) SET ?", answers.name, (err, res) => {
+  .then((answer) => {
+   db.query("INSERT INTO departments (name) VALUES ?", answer.name.value, (err, res) => {
       if(err) {
         console.log(err);
       }
-      console.table(res);
+      printTable(res);
+      navMenu();
     });
   });
 }
@@ -115,8 +124,8 @@ const addRole = () => {
       const role = answers.title;
       const salary = answers.salary;
       const department = answers.department;
-  
-    db.query("INSERT INTO roles (job_title, salaries, department_id) VALUES ( ?, ?, ?)").then( ([role, salary, department]), (err, res) => {
+      console.log(role, salary, department)
+    db.query("INSERT INTO roles (job_title, salaries, department_id) VALUES ( ?, ?, ?)", [role, salary, department], (err, res) => {
       if(err) {
         console.log(err);
       }
@@ -144,7 +153,7 @@ const updateEmployee = () => {
     console.log(res);
   });
 }
-
+// await db.promise(select id value, title name FROM)
 
 // after homepage must display 5 options: 
 // add department - prompt appears, asks for name of the department, then adds department
