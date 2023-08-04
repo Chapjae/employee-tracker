@@ -20,10 +20,10 @@ const departmentQuestion = [{name: "name", message: "What is the name of the dep
 const departmentsArr = [{value:1, name:'Sales'},{value:2, name:'Marketing'},{value: 3, name:'Finance'},{value: 3, name:'Human Resources'},{value:4, name:'Operations'}];  
 
 const employeeQuestion = [
-                          {name: "first_name", message: "What is the employee's first name?"},
-                          {name: "last_name", message: "What is the employee's last name?"},
-                          {name: "role", message: "What is the employee's role?"},
-                          {name: "manager", message: "Who is the employee's manager?"}
+                          {type: "input", name: "first_name", message: "What is the employee's first name?"},
+                          {type: "input", name: "last_name", message: "What is the employee's last name?"},
+                          {type: "choice", name: "role", message: "What is the employee's role?", choices: roles.job_title },
+                          {type: "input", name: "manager", message: "Who is the employee's manager?"}
                          ]
 
 const navMenu = () => {
@@ -54,7 +54,7 @@ const navMenu = () => {
         case "Nevermind I'm done":
           process.exit(0);
     } 
-    navMenu();
+    // navMenu();
   });
 };
 
@@ -65,19 +65,19 @@ const db = mysql.createConnection(
     password: "password",
     database: "departments_db"
   },       
-  console.log("connected")
+  console.log("connected"),
+  navMenu()
 );
 
 
-navMenu();
 
 const viewAllDepartments = () => {
     db.query("SELECT * FROM departments", (err, res) => {
       if (err) {
         console.log(err);
       }
-      printTable(res);
-      navMenu();
+      console.table(res);
+      navMenu()
   });
 }
 
@@ -86,8 +86,8 @@ const viewAllRoles = () => {
     if (err) {
       console.log(err);
     }
-    printTable(res);
-    navMenu();
+    console.table(res);
+    navMenu()
   });
 }  
 
@@ -96,8 +96,8 @@ const viewAllEmployees = () => {
     if(err) {
       console.log(err);
     }
-    printTable(res);
-    navMenu();
+    console.table(res);
+    navMenu()
   });
 }  
 
@@ -108,8 +108,8 @@ const addDepartment = () => {
       if(err) {
         console.log(err);
       }
-      printTable(res);
-      navMenu();
+      console.table(res);
+      navMenu()
     });
   });
 }
@@ -131,17 +131,26 @@ const addRole = () => {
       }
       console.log("Role added!");
       console.table(res)
-      navMenu();
+      navMenu()
     });
   });
 }
 
 const addEmployee = () => {
-  db.query("INSERT INTO employees SET ?", (err, res) => {
-    if(err) {
-      console.log(err);
-    }
-    console.log(res);
+    inquirer.prompt(employeeQuestion)
+      .then((answers) => {
+        const first_name = answers.first_name;
+        const last_name = answers.last_name;
+        const role = answers.role;
+        const manager = answers.manager;
+      db.query("INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)", 
+              [first_name, last_name, role, manager], (err, res) => {
+      if(err) {
+        console.log(err);
+      }
+      console.table(res);
+      navMenu()
+    });
   });
 }
 
@@ -151,6 +160,7 @@ const updateEmployee = () => {
       console.log(err);
     }
     console.log(res);
+    navMenu()
   });
 }
 // await db.promise(select id value, title name FROM)
