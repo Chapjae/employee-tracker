@@ -91,7 +91,7 @@ const viewAllEmployees = () => {
       console.log(err);
     }
     console.table(res);
-    inquirer.prompt(questions);
+    navMenu();
   });
 }  
 
