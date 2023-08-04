@@ -1,4 +1,3 @@
-const express = require('express');
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
 const fs = require("fs");
@@ -18,7 +17,9 @@ const questions = [
                    "Add a Role", "Add an Employee", "Update an Employee", "Nevermind I'm done"]
     },
   ]
-  
+
+const departmentQuestion = [{name: "name", message: "What is the name of the department you would like to add?"}];  
+
 const departmentsArr = ['Sales','Marketing','Finance','Human Resources','Operations'];  
 
 const navMenu = () => {
@@ -96,7 +97,14 @@ const viewAllEmployees = () => {
 }  
 
 const addDepartment = () => {
-  db.query("INSERT INTO departments SET ?", (err, res) => {
+  inquirer.prompt(departmentQuestions)
+  .then(answers => {
+   db.query("INSERT INTO departments (name) values (?)", (err, res) => {
+    newdepartment, function(err, res) {
+
+    } 
+  
+    
     if(err) {
       console.log(err);
     }
@@ -114,19 +122,14 @@ const addRole = () => {
       const role = answers.title;
       const salary = answers.salary;
       const department = answers.department;
-      let departmentIdx;
-      
-      for (let i = 0; i < department.length; i++) {  
-          if (department === departmentsArr[i]) {
-            departmentIdx = departmentsArr[i].indexOf();
-          } 
-          return departmentIdx;
-      }
+  
     db.query("INSERT INTO roles (job_title, salaries, department_id) VALUES ( ?, ?, ?)").then( ([role, salary, department]), (err, res) => {
       if(err) {
         console.log(err);
       }
       console.log("Role added!");
+      console.table(res)
+      navMenu();
     });
   });
 }
