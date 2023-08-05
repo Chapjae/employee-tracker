@@ -1,6 +1,5 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
-const fs = require("fs");
 
 const questions = [
     {
@@ -11,7 +10,6 @@ const questions = [
                    "Add a Role", "Add an Employee", "Update an Employee", "Nevermind I'm done"]
     },
   ]
-
 
   const db = mysql.createConnection(
     {
@@ -29,19 +27,15 @@ function getDepts() {
 }
 
 function getRoles() {
-  return db.promise().query("SELECT roles.id, roles.job_title, roles.salaries, roles.department_id FROM roles;")
+  return db.promise().query("SELECT roles.id, roles.job_title, roles.salaries, roles.department_id FROM roles;");
+}
+
+function getEmployees() {
+  return db.promise().query("SELECT first_name, last_name, id, role_id, manager_id FROM employees");
 }
 
 const departmentQuestion = [{name: "dept", message: "What is the name of the department you would like to add?"}];  
 
-// const employeeQuestion = [
-//                           {type: "input", name: "first_name", message: "What is the employee's first name?"},
-//                           {type: "input", name: "last_name", message: "What is the employee's last name?"},                                                                                
-//                           {type: "choice", name: "role", message: "What is the employee's role?" }, 
-//                           {type: "input", name: "manager", message: "Who is the employee's manager?"}
-//                          ]
-
-//const navMenu = () => {
 function navMenu () {
   inquirer.prompt(questions)
     .then((answers) => {
@@ -70,12 +64,10 @@ function navMenu () {
         case "Nevermind I'm done":
           process.exit(0);
     } 
-    // navMenu();
   });
 };
 
 const viewAllDepartments = () => {
-    // selecting and getting all departments from the departments table, this comes from database
     db.query("SELECT * FROM departments", (err, res) => {
       if (err) {
         console.log(err);
@@ -108,17 +100,12 @@ const viewAllEmployees = () => {
 const addDepartment = () => {
   inquirer.prompt(departmentQuestion)
   .then(({dept}) => {
-    // db.promise().query('INSERT INTO departments (name) VALUE (?)', dept)
-    // .then(res => console.log(res))
-    // .catch(err => console.log("ERROR: ", err))
    db.query("INSERT INTO departments (name) VALUE (?)", dept, (err, res) => {
       if(err) {
         console.log(err);
       }
       console.table(res);
       viewAllDepartments()
-
-      navMenu()
     });
    });
 }
@@ -147,18 +134,16 @@ const addRole = () => {
       console.log("Role added!");
       console.table(res)
       viewAllRoles()
-      // navMenu()
     });
   });
 });
 }
 
-
 const addEmployee = () => {
   getRoles()
   .then(([rows]) => {
     let roles = rows;
-    const roleChoice = roles.map(({job_title}) => job_title)
+    const roleChoice = roles.map(({job_title, id}) => ({ name: job_title, value: id}))
     inquirer.prompt([
                     {type: "input", name: "first_name", message: "What is the employee's first name?"},
                     {type: "input", name: "last_name", message: "What is the employee's last name?"},                                                                                
@@ -182,24 +167,32 @@ const addEmployee = () => {
 }
 
 const updateEmployee = () => {
-  updateEmployee()
-  .then
-
-  db.query("UPDATE employees SET ?", (err, res) => {
-    if(err) {
-      console.log(err);
-    }
-    console.log(res);
-    navMenu()
-  });
+  getRoles()
+    .then(([rows]) => {
+      let roles = rows;
+      const roleChoice = roles.map(({job_title, id}) => ({name: job_title, value: id }))
+  getEmployees()
+  .then(([rows]) => {
+    let employees = rows;
+    const employeeChoices = employees.map((employee) => ({
+    name: `${employee.first_name} ${employee.last_name}`,
+    value: employee.id,}))
+    console.log(employeeChoices)
+    inquirer.prompt([
+      {type: "list", name: "employee", message: "Which employee needs to be updated?", choices: employeeChoices},
+      {type: "list", name: "role", message: "What role is this employee now?", choices: roleChoice }
+    ])
+    .then((answers) => {
+      const selectedEmployee = answers.employee
+      const selectRole = answers.role
+    db.query("UPDATE employees SET role_id = ? WHERE id = ?", [selectRole, selectedEmployee], (err, res) => {
+      if(err) {
+        console.log(err);
+      } 
+        console.table(res);
+      viewAllEmployees();
+    });
+  })
+})
+})
 }
-// await db.promise(select id value, title name FROM)
-
-// after homepage must display 5 options: 
-// add department - prompt appears, asks for name of the department, then adds department
-        // probably needs inquirer and fs.read / writefile
-// add role - prompt for name, salary and department
-// add employee - prompt for first name, last name, role and manager, add to db
-// update employee role - prompt update new role and add to database
-        // will need seperate dbs for each function
-        // don't forget json stringify and json parse for data
