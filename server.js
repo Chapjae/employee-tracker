@@ -2,8 +2,6 @@ const inquirer = require('inquirer');
 const mysql = require('mysql2');
 const fs = require("fs");
 
-const PORT = process.env.PORT || 3000;
-
 const questions = [
     {
         type : "list",
@@ -14,18 +12,39 @@ const questions = [
     },
   ]
 
-const departmentQuestion = [{name: "name", message: "What is the name of the department you would like to add?"}];  
 
-const departmentsArr = [{value:1, name:'Sales'},{value:2, name:'Marketing'},{value: 3, name:'Finance'},{value: 3, name:'Human Resources'},{value:4, name:'Operations'}];  
+  const db = mysql.createConnection(
+    {
+      host: 'localhost',
+      user: "root",
+      password: "password",
+      database: "departments_db"
+    },       
+    console.log("connected"),
+    navMenu()
+  );
 
-const employeeQuestion = [
-                          {type: "input", name: "first_name", message: "What is the employee's first name?"},
-                          {type: "input", name: "last_name", message: "What is the employee's last name?"},
-                          {type: "choice", name: "role", message: "What is the employee's role?", choices: roles.job_title },
-                          {type: "input", name: "manager", message: "Who is the employee's manager?"}
-                         ]
+function getDepts() {
+  return db.promise().query("SELECT departments.id, departments.name FROM departments;")
+}
 
-const navMenu = () => {
+function getRoles() {
+  return db.promise().query("SELECT (roles.id, roles.name FROM roles;")
+}
+
+const departmentQuestion = [{name: "dept", message: "What is the name of the department you would like to add?"}];  
+
+//const departmentsArr = [{value:1, name:'Sales'},{value:2, name:'Marketing'},{value: 3, name:'Finance'},{value: 3, name:'Human Resources'},{value:4, name:'Operations'}];  
+
+// const employeeQuestion = [
+//                           {type: "input", name: "first_name", message: "What is the employee's first name?"},
+//                           {type: "input", name: "last_name", message: "What is the employee's last name?"},                                                                                
+//                           {type: "choice", name: "role", message: "What is the employee's role?" }, 
+//                           {type: "input", name: "manager", message: "Who is the employee's manager?"}
+//                          ]
+
+//const navMenu = () => {
+function navMenu () {
   inquirer.prompt(questions)
     .then((answers) => {
       switch (answers.options) {
@@ -57,18 +76,8 @@ const navMenu = () => {
   });
 };
 
-const db = mysql.createConnection(
-  {
-    host: 'localhost',
-    user: "root",
-    password: "password",
-    database: "departments_db"
-  },       
-  console.log("connected"),
-  navMenu()
-);
-
 const viewAllDepartments = () => {
+    // selecting and getting all departments from the departments table, this comes from database
     db.query("SELECT * FROM departments", (err, res) => {
       if (err) {
         console.log(err);
@@ -100,28 +109,39 @@ const viewAllEmployees = () => {
 
 const addDepartment = () => {
   inquirer.prompt(departmentQuestion)
-  .then((answer) => {
-   db.query("INSERT INTO departments (name) VALUES ?", answer.name.value, (err, res) => {
+  .then(({dept}) => {
+    // db.promise().query('INSERT INTO departments (name) VALUE (?)', dept)
+    // .then(res => console.log(res))
+    // .catch(err => console.log("ERROR: ", err))
+   db.query("INSERT INTO departments (name) VALUE (?)", dept, (err, res) => {
       if(err) {
         console.log(err);
       }
       console.table(res);
+      viewAllDepartments()
+
       navMenu()
     });
-  });
+   });
 }
 
 const addRole = () => {
+  getDepts()
+  .then(([rows]) => {
+    let dept = rows;
+    const deptChoice = dept.map(({id, name}) => ({
+      name: name,
+      value: id
+    }))
   inquirer.prompt([{name: "title", message: "What is this role called?"},
                    {name: "salary", message: "How much does this role get paid?"},
                    {type: "list", name: "department", message: "What department does this role belong to?",
-                    choices: departmentsArr
+                    choices: deptChoice
                   }])
     .then((answers) => {
       const role = answers.title;
       const salary = answers.salary;
       const department = answers.department;
-      console.log(role, salary, department)
     db.query("INSERT INTO roles (job_title, salaries, department_id) VALUES ( ?, ?, ?)", [role, salary, department], (err, res) => {
       if(err) {
         console.log(err);
@@ -131,16 +151,30 @@ const addRole = () => {
       navMenu()
     });
   });
+});
 }
 
+
 const addEmployee = () => {
-    inquirer.prompt(employeeQuestion)
+  getRoles()
+  .then(([rows]) => {;
+    let roles = rows;
+    const roleChoice = roles.map(({id, name}) => ({
+      name: name,
+      value: id
+    }))
+    inquirer.prompt([
+                      {type: "input", name: "first_name", message: "What is the employee's first name?"},
+                      {type: "input", name: "last_name", message: "What is the employee's last name?"},                                                                                
+                      {type: "choice", name: "role", message: "What is the employee's role?", choices: roleChoice }, 
+                      {type: "input", name: "manager", message: "Who is the employee's manager?"}
+                    ])
       .then((answers) => {
         const first_name = answers.first_name;
         const last_name = answers.last_name;
         const role = answers.role;
         const manager = answers.manager;
-      db.query("INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)", 
+      db.query("INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)",  [first_name, last_name, role, manager]
               [first_name, last_name, role, manager], (err, res) => {
       if(err) {
         console.log(err);
@@ -149,6 +183,7 @@ const addEmployee = () => {
       navMenu()
     });
   });
+});
 }
 
 const updateEmployee = () => {
