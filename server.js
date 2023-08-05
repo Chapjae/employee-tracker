@@ -29,12 +29,10 @@ function getDepts() {
 }
 
 function getRoles() {
-  return db.promise().query("SELECT (roles.id, roles.name FROM roles;")
+  return db.promise().query("SELECT roles.id, roles.job_title, roles.salaries, roles.department_id FROM roles;")
 }
 
 const departmentQuestion = [{name: "dept", message: "What is the name of the department you would like to add?"}];  
-
-//const departmentsArr = [{value:1, name:'Sales'},{value:2, name:'Marketing'},{value: 3, name:'Finance'},{value: 3, name:'Human Resources'},{value:4, name:'Operations'}];  
 
 // const employeeQuestion = [
 //                           {type: "input", name: "first_name", message: "What is the employee's first name?"},
@@ -148,7 +146,8 @@ const addRole = () => {
       }
       console.log("Role added!");
       console.table(res)
-      navMenu()
+      viewAllRoles()
+      // navMenu()
     });
   });
 });
@@ -157,36 +156,35 @@ const addRole = () => {
 
 const addEmployee = () => {
   getRoles()
-  .then(([rows]) => {;
+  .then(([rows]) => {
     let roles = rows;
-    const roleChoice = roles.map(({id, name}) => ({
-      name: name,
-      value: id
-    }))
+    const roleChoice = roles.map(({job_title}) => job_title)
     inquirer.prompt([
-                      {type: "input", name: "first_name", message: "What is the employee's first name?"},
-                      {type: "input", name: "last_name", message: "What is the employee's last name?"},                                                                                
-                      {type: "choice", name: "role", message: "What is the employee's role?", choices: roleChoice }, 
-                      {type: "input", name: "manager", message: "Who is the employee's manager?"}
+                    {type: "input", name: "first_name", message: "What is the employee's first name?"},
+                    {type: "input", name: "last_name", message: "What is the employee's last name?"},                                                                                
+                    {type: "list", name: "role", message: "What is the employee's role?", choices: roleChoice }, 
+                    {type: "input", name: "manager", message: "Who is the employee's manager?"}
                     ])
       .then((answers) => {
         const first_name = answers.first_name;
         const last_name = answers.last_name;
         const role = answers.role;
         const manager = answers.manager;
-      db.query("INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)",  [first_name, last_name, role, manager]
-              [first_name, last_name, role, manager], (err, res) => {
+      db.query("INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)",  [first_name, last_name, role, manager], (err, res) => {
       if(err) {
         console.log(err);
       }
       console.table(res);
-      navMenu()
+      viewAllEmployees()
     });
   });
 });
 }
 
 const updateEmployee = () => {
+  updateEmployee()
+  .then
+
   db.query("UPDATE employees SET ?", (err, res) => {
     if(err) {
       console.log(err);
